@@ -1,0 +1,99 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{name}}的月考成绩</title>
+    <!-- Linking Bootstrap CSS -->
+    <link rel="stylesheet" href="{% static 'stu_page/bootstrap.min.css' %}">
+    
+    <style>
+        body {
+            background: #fafafa;
+        }
+
+        .container {
+            margin: 5% auto;
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+        }
+
+        .card {
+            padding: 2rem;
+            margin-top: 5vh;
+        }
+
+        .table {
+            font-size: 120%;
+        }
+
+        .table td, .table th {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .table-bordered {
+            border-width: 2px;
+        }
+
+        .title-container {
+            background-color: #f2f2f2;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-size: 24px;
+            font-family: 'Arial', sans-serif;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Title container for the page -->
+    <div class="title-container">
+        {{name}}的高代月考成绩
+    </div>
+
+    <!-- Main container for the card and table -->
+    <div class="container">
+        <div class="card m-3 p-3">
+            <div class="table-responsive">
+                <!-- Table displaying student's monthly exam scores -->
+                <table class="table table-bordered table-striped" id="myTable" border="1">
+                    <thead>
+                        <tr>
+                            <th>学号</th>
+                            <th>姓名</th>
+                            <th>1月考成绩</th>
+                            <th>2月考成绩</th>
+                            <th>3月考成绩</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data row with student's scores -->
+                        <tr>
+                            <td>{{id}}</td>
+                            <td>{{name}}</td>
+                            <td>{{score1}}</td>
+                            <td>{{score2}}</td>
+                            <td>{{score3}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript files -->
+    <script src="{% static 'stu_page/index.js' %}"></script>
+    <script>
+        // Initialization of the RdataTB object for table data handling
+        let x = new RdataTB('myTable');
+    </script>
+    <script src="{% static 'stu_page/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>

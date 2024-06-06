@@ -1,0 +1,277 @@
+﻿{% load static %}
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高代月考成绩</title>
+    <link rel="stylesheet" href="{% static 'teacher_page/bootstrap.min.css' %}">
+    
+    <style>
+        body {
+            background: #fafafa;
+        }
+
+        .container {
+            margin: 5% auto;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .table td,
+        .table th {
+            vertical-align: middle;
+            text-align: center;
+        }
+
+        .title-container {
+            background-color: #f2f2f2;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-size: 24px;
+            font-family: 'Arial', sans-serif;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="title-container">
+        学生月考成绩操作界面
+    </div>
+
+    <div class="container">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>1班人数</th>
+                    <th>2班人数</th>
+                    <th>3班人数</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for num in classes %}
+                    <td>{{ num }}</td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="container">
+        <div class="card m-3 p-3">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped" id="myTable" border="1">
+                    <thead>
+                        <tr>
+                            <th>学号</th>
+                            <th>姓名</th>
+                            <th>1月考成绩</th>
+                            <th>2月考成绩</th>
+                            <th>3月考成绩</th>
+                            <th>班号</th>
+                            <th>删除操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in list %}
+                            <tr>
+                                <td>{{ item.stu_id_id }}</td>
+                                <td>{{ item.name }}</td>
+                                <td>{{ item.score1 }}</td>
+                                <td>{{ item.score2 }}</td>
+                                <td>{{ item.score3 }}</td>
+                                <td>{{ item.class_id_id }}</td>
+                                <td>
+                                    <button type="button" class="btn btn-primary" onclick="Delete('{{ item.stu_id_id }}')">删除</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <p class="lead">
+                    <button class="btn btn-danger" onclick="x.DownloadCSV('csv');">导出 (CSV)</button>
+                    <button class="btn btn-danger" onclick="toggleForm()">插入</button>
+                </p>
+                
+                <div id="formContainer" style="display: none;">
+                    <form>
+                        <div class="form-group">
+                            <label for="stu_id">学号：</label>
+                            <input type="number" class="form-control" id="stu_id" name="stu_id" />
+                        </div>
+                        <div class="form-group">
+                            <label for="name">姓名：</label>
+                            <input type="text" class="form-control" id="name" name="name" />
+                        </div>
+                        <div class="form-group">
+                            <label for="score1">1月考成绩：</label>
+                            <input type="number" class="form-control" id="score1" name="score1" />
+                        </div>
+                        <div class="form-group">
+                            <label for="score2">2月考成绩：</label>
+                            <input type="number" class="form-control" id="score2" name="score2" />
+                        </div>
+                        <div class="form-group">
+                            <label for="score3">3月考成绩：</label>
+                            <input type="number" class="form-control" id="score3" name="score3" />
+                        </div>
+                        <div class="form-group">
+                            <label for="class_id">班号：</label>
+                            <input type="number" class="form-control" id="class_id" name="class_id" />
+                        </div>
+                        <p></p>
+                        <button type="button" class="btn btn-success" onclick="save()">保存</button>
+                    </form>
+                </div>
+                <p></p>
+                <p class="lead">
+                    {% csrf_token %}
+                    <input id="upload" type="file" style="width: 50%" name="file" id="filename">
+                    <button class="btn btn-danger" type="button" onclick="Upload()">更新</button>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleForm() {
+            document.getElementById("formContainer").style.display = document.getElementById("formContainer").style.display === "none" ? "block" : "none";
+        }
+
+        function save() {
+            // 弹窗显示所有输入值
+            alert(`
+                学号: ${document.getElementById("stu_id").value}
+                姓名: ${document.getElementById("name").value}
+                1月考成绩: ${document.getElementById("score1").value}
+                2月考成绩: ${document.getElementById("score2").value}
+                3月考成绩: ${document.getElementById("score3").value}
+                班号: ${document.getElementById("class_id").value}
+            `);
+            document.getElementById("formContainer").style.display = "none";
+
+            // 获取表单数据
+            const stu_id = parseInt(document.getElementById("stu_id").value, 10);
+            const name = document.getElementById("name").value;
+            const score1 = parseInt(document.getElementById("score1").value, 10);
+            const score2 = parseInt(document.getElementById("score2").value, 10);
+            const score3 = parseInt(document.getElementById("score3").value, 10);
+            const class_id = parseInt(document.getElementById("class_id").value, 10);
+
+            // 检查转换是否成功，防止NaN
+            if (isNaN(stu_id) || isNaN(class_id)) {
+                alert("请确保所有数字字段都填写了有效的数字。");
+                return; // 阻止进一步的执行
+            }
+
+            // 创建FormData对象
+            var formData = new FormData();
+            formData.append('stu_id', stu_id);
+            formData.append('name', name);
+            formData.append('score1', score1);
+            formData.append('score2', score2);
+            formData.append('score3', score3);
+            formData.append('class_id', class_id);
+
+
+            // 发送POST请求
+            fetch('./insert', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'), // 获取CSRF token
+                },
+            })
+            .then(data => {
+                console.log('Success:', data);
+                // 在这里添加页面刷新的代码
+                location.reload(); 
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+
+        function Delete(stu_id){
+            alert(`
+                学号: ${stu_id}
+            `);
+            var formData = new FormData();
+            formData.append('stu_id', stu_id);
+            fetch('./delete', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'), // 获取CSRF token
+                },
+            })
+            .then(data => {
+                console.log('Success:', data);
+                // 在这里添加页面刷新的代码
+                location.reload(); 
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
+        }
+
+        function Upload() {
+            var fileInput = document.getElementById('upload').files[0];
+            if (fileInput) {
+                var formData = new FormData();
+                formData.append('file', fileInput);
+                alert(
+                    formData.get('file').name
+                )
+                fetch('./upload', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'), // 获取CSRF token
+                    },
+                })
+                .then(data => {
+                    console.log('Success:', data);
+                    // 在这里添加页面刷新的代码
+                    location.reload(); 
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            } else {
+                alert("请选择上传文件！");
+            }
+        }
+
+
+        // 用于获取CSRF token的辅助函数
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    // 获取名为 name 的 cookie 值
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+    </script>
+
+    <script src="{% static 'teacher_page/index2.js' %}"></script>
+    <script>
+        let x = new RdataTB('myTable');
+    </script>
+    <script src="{% static 'teacher_page/bootstrap.bundle.min.js' %}"></script>
+</body>
+</html>
